@@ -1,0 +1,15 @@
+{
+  "name": "d3-gauge",
+  "version": "1.0.0",
+  "description": "Flexible gauge plugin using the D3 library",
+  "main": "d3_gauge.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tony Fardella",
+  "license": "ISC",
+  "dependencies": {
+    "d3": "^4.2.2",
+    "jquery": "^3.1.0"
+  }
+}
