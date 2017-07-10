@@ -6,13 +6,12 @@ var arcGauge = function (data, element, options ) {
     'margin': {top: 0, right: 0, bottom: 0, left: 0},
     'arcWidth': 60,
     'cornerRadius': 4,
-    'clockwise': true,
+    'clockwise': false,
     'startAngle': 240,
     'endAngle': 120,
     'precision': 0,
-    'textCountUp': true,
-    'textStartValue': 0,
-    'textFinalValue': 50,
+    'textX': '0.3em',
+    'textY': '0em',
     'animationDuration': 500 
   };
 
@@ -33,7 +32,7 @@ var arcGauge = function (data, element, options ) {
   } else {
     self.options = $.extend({}, defaults);         
   }    
-}
+};
 
 arcGauge.prototype = {
   checkData: function( data ) {
@@ -52,21 +51,12 @@ arcGauge.prototype = {
     self.outerRadius = self.width / 2;
     self.innerRadius = self.outerRadius - self.options.arcWidth;
 
-    var polarToCartesian = function( centerX, centerY, radius, angleInDegrees ) {
-      var angleInRadians = ( angleInDegrees - 90 ) * Math.PI / 180.0;
-
-      return {
-        x: centerX + ( radius * Math.cos( angleInRadians ) ),
-        y: centerY + ( radius * Math.sin( angleInRadians ) )
-      };
-    }
-
     var toRadians = function( degrees ) {
         return( degrees * ( Math.PI / 180 ) );
     };
 
     self.startRadians = toRadians( self.options.startAngle );
-    self.endRadians = ( toRadians( self.options.endAngle + ( self.options.clockwise ? 360 : 0 ) ) );
+    self.endRadians = ( toRadians( self.options.endAngle + ( self.options.clockwise ? 0 : 360 ) ) );
 
     // Setup SVG element
     var canvas = d3.select( self.element ).append( 'svg' )
@@ -92,13 +82,13 @@ arcGauge.prototype = {
       .cornerRadius( self.options.cornerRadius );
 
     // Append the background arc to the SVG element
-    self.bg2 = self.group.append('path')
+    self.bg = self.group.append('path')
       .datum( { endAngle: self.endRadians } )
       .attr( "d", self.gaugeArc )
       .attr( "class", "bgArc" );
 
     // Append the foreground arc to the SVG element
-    self.fg2 = self.group.append('path')
+    self.fg = self.group.append('path')
       .datum( { endAngle: ( ( ( self.data) * ( self.endRadians - self.startRadians ) ) + self.startRadians ) } )
       .attr( "d", self.gaugeArc )
       .attr( "class", "fgArc" );
@@ -113,23 +103,26 @@ arcGauge.prototype = {
 
     self.gaugeText = self.group.append( 'text' )
       .attr( "class", "gaugeText" )
-      .style( "font-size", self.outerRadius/2.5 + "px" )
-      // .attr("x", 0)
-      // .attr("dy", ".35em")
-      .attr("text-anchor", "middle")
-      .text( (self.data * 100).toFixed( self.options.precision )  + "%");
-
+      .attr("x", self.options.textX)
+      .attr("dy", self.options.textY)
+      .text( (self.data * 100).toFixed( self.options.precision ) + "%");
+      
+      self.gaugeText.currentValue = self.data;
+    
       return self;
   },
 
   updateGauge: function( data ) {
     var self = this;
 
-    var textRounderUpdater = function( data ){ return Math.round( data ); };
-
     var textTween = function(){
-      var i = d3.interpolate( self.gaugeText.textContent, parseFloat( data ).toFixed( self.options.precision ) );
-      return function( t ) { self.gaugeText.textContent = textRounderUpdater( i( t ) ); }
+      var textItem = this;
+      var i = d3.interpolate( self.gaugeText.currentValue, data );
+      self.gaugeText.currentValue = data;
+
+      return function( t ) { 
+        textItem.textContent = (i( t ) * 100).toFixed(self.options.precision) + "%"; 
+      }
     };
 
     function arcTween( transition, newAng ) {
@@ -145,11 +138,10 @@ arcGauge.prototype = {
       });
     }
 
-    self.fg2.transition()
+    self.fg.transition()
         .duration( self.options.animationDuration )
         .call( arcTween, data ) ;
 
-    self.gaugeText.text( (data * 100).toFixed( self.options.precision ) + "%" );
     self.gaugeText.transition()
       .duration( self.options.animationDuration )
       .tween( "text", textTween);

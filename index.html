@@ -1,165 +1,74 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>Arc Gauge</title>
     <meta charset="utf-8">
     <style type="text/css" media="screen">
+      .page-content {
+        margin: 20px;
+      }
+
+      #arc-gauge {
+        width: 300px;
+        height: 300px;
+      }
       .bgContainer {
         background-color: white;
       }
 
-      .fgArc {
+      #arc-gauge .fgArc {
         fill: rgba( 255, 180, 0, 1 );
         stroke: rgba( 255, 180, 0, 1 );
         stroke-width: 4;
       }
 
-      .bgArc {
+      #arc-gauge .bgArc {
         fill: rgba( 128, 128, 128, 0.5 );
         stroke: rgba( 128, 128, 128, 0.1 );
         stroke-width: 4;
       }
 
-      .gaugeText {
+      #arc-gauge .gaugeText {
         width: 100%;
-        font-size: 80px;
+        font-size: 60px;
         text-align: center;
         font-family: helvetica;
         fill: rgba( 155, 50, 120, 1 );
         stroke: rgba( 155, 50, 120, 1 );
-        stroke-width: 4;
+        stroke-width: 1;
+        text-anchor: middle;
       }
     </style>
   </head>
   <body>
+    <div class="page-content">
+      <h2>Arc Gauge</h2>
+      <div id="arc-gauge"></div>
+    </div>
 
-    <div class="arcContainer"></div>
-
-    <div id="myArc"></div>
-
-    <div id="myArc2"></div>
 
     <script src="node_modules/jquery/dist/jquery.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="node_modules/d3/build/d3.min.js" charset="utf-8"></script>
+    <script src="arc-gauge.js"></script>
 
     <script>
+      $( function(){
+        var options = {
+          'arcWidth': 40,
+          'clockwise': false,
+          'startAngle': 240,
+          'endAngle': 120
+        };
+        
+        var myGauge = new arcGauge( 0.5, '#arc-gauge', options );
+        myGauge.initialize().drawGauge().drawText();
 
-/*
-    checkout: http://bl.ocks.org/brattonc/5e5ce9beee483220e2f6
-*/
-    function polarToCartesian( centerX, centerY, radius, angleInDegrees )
-    {
-      var angleInRadians = ( angleInDegrees - 90 ) * Math.PI / 180.0;
-
-      return {
-        x: centerX + ( radius * Math.cos( angleInRadians ) ),
-        y: centerY + ( radius * Math.sin( angleInRadians ) )
-      };
-    }
-
-    var toRadians = function( degrees ) {
-        return( degrees * ( Math.PI / 180 ) );
-    };
-
-    var options = {};
-
-    var defaults = {
-      elementID: "#myArc",
-      width: 400,
-      height: 400,
-      outerRadius: 200,
-      innerRadius: 140,
-      cornerRadius: 4,
-      clockwise: true,
-      startAngle: 240,
-      endAngle: 120,
-      percent: 0,
-      precision: 1,
-      textCountUp: true,
-      textStartValue: 0,
-      textFinalValue: 50
-    };
-    
-    var textSize = options.textSize * options.outerRadius / 2;
-
-    var options = $.extend( {}, defaults, options );
-
-    var startRadians = toRadians( options.startAngle );
-    var endRadians = ( toRadians( options.endAngle + ( options.clockwise ? 360 : 0 ) ) );
-
-    var canvas = d3.select( options.elementID ).append( 'svg' )
-      .attr( "class", "bgContainer" )
-      .attr( "width", options.width )
-      .attr( "height", options.height );
-
-    var group = canvas.append( "g" )
-      .attr( "transform", "translate( " + options.outerRadius + ", " + options.outerRadius + " )" );
-
-    var myarc = d3.arc()
-      .innerRadius( options.innerRadius )
-      .outerRadius( options.outerRadius )
-      .startAngle( startRadians );
-
-    myarc.cornerRadius( options.cornerRadius );
-
-    var bg2 = group.append('path')
-      .datum( { endAngle: endRadians } )
-      .attr( "d", myarc )
-      .attr( "class", "bgArc" );
-
-    var fg2 = group.append('path')
-      .datum( { endAngle: ( ( (options.percent * 0.01) * ( endRadians - startRadians ) ) + startRadians ) } )
-      .attr( "d", myarc )
-      .attr( "class", "fgArc" );
-
-    var gaugeText = group.append( 'text' )
-      .attr( "class", "gaugeText" )
-//      .style( "font-size", options.outerRadius/2.5 + "px" )
-      .attr("dx", function(d){return - ( options.outerRadius * 0.35 ) })
-      .text( options.percent  + "%");
-
-/***************************
-*/
-
-    var gaugeUpdate = function( path, value, duration, pct ) {
-      if( duration === null ) { 
-        duration = 500 
-      }
-
-      var textRounderUpdater = function(value){ return Math.round(value); };
-
-      var textTween = function(){
-        var i = d3.interpolate( gaugeText.textContent, parseFloat( value ).toFixed( 2 ) );
-        return function( t ) { gaugeText.textContent = textRounderUpdater( i( t ) ); }
-      };
-
-      function arcTween( transition, newAng ) {
-        transition.attrTween( "d", function( d ) {
-          var interpolate = d3.interpolate( d.endAngle, newAng );
-
-          return function( t ) {
-            d.endAngle = interpolate(t);
-            return myarc( d );
-          };
-        });
-      }
-
-      path.transition()
-          .duration( duration )
-          .call( arcTween, value ) ;
-
-      gaugeText.text( Math.round( pct, options.precision ) + "%" );
-      gaugeText.transition()
-        .duration( options.duration )
-        .tween( "text", textTween);
-
-    };
-
-    setInterval( function() {
-      options.percent = ( Math.random()  * 100 ) * 0.01;
-      var newAng = ( ( options.percent * ( endRadians - startRadians ) ) + startRadians );
-      gaugeUpdate( fg2, newAng, 500, ( options.percent * 100 ) );
-    }, 1500);
-
+        var callback = function() {
+          var data = ( Math.random()  * 100 ) * 0.01;
+          myGauge.updateGauge(data);
+        }
+        setInterval( callback, 1500);
+      });
     </script>
   </body>
 </html>
