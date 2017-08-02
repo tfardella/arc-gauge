@@ -74,7 +74,7 @@ arcGauge.prototype = {
   drawGauge: function() {
     var self = this;
 
-    // Create the arc
+    // Create the arc we'll use to create the foreground and background arcs
     self.gaugeArc = d3.arc()
       .innerRadius( self.innerRadius )
       .outerRadius( self.outerRadius )
