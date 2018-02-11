@@ -1,9 +1,16 @@
+/**
+ * Create a new arcGauge
+ * @param {number} initial value ( 0 - 1)
+ * @param {string} DOM element id
+ * @param {object} options (see defaults below for what can be changed
+ * @return {object} arcGauge
+ */
 var arcGauge = function (data, element, options ) {
   var self = this;
 
   var defaults = {
     'elementID': "#arc-gauge",
-    'margin': {top: 0, right: 0, bottom: 0, left: 0},
+    'margin': {top: 10, right: 10, bottom: 10, left: 10},
     'arcWidth': 60,
     'cornerRadius': 4,
     'clockwise': false,
@@ -28,13 +35,19 @@ var arcGauge = function (data, element, options ) {
   }
 
   if(options) {
-    self.options = $.extend({}, defaults, options);          
+//    self.options = $.extend({}, defaults, options);          
+    self.options = { ...defaults, ...options};          
   } else {
-    self.options = $.extend({}, defaults);         
+    self.options = { ...defaults};         
   }    
 };
 
 arcGauge.prototype = {
+  /**
+   * Check if data is valid
+   * @param {number} value (0 - 1)
+   * @return {number} value or 0 if not valid
+   */
   checkData: function( data ) {
     data = parseFloat(data);
     if( data < 0 || !data > 1 ) {
@@ -43,6 +56,10 @@ arcGauge.prototype = {
     return data;
   },
 
+  /**
+   * Initialize an arcGauge
+   * @return {object} arcGauge
+   */
   initialize: function () {
     var self = this;
     var containerRect = d3.select( self.element ).node().getBoundingClientRect();
@@ -71,6 +88,10 @@ arcGauge.prototype = {
     return self;
   },
 
+  /**
+   * Draw the gauge
+   * @return {object} arcGauge
+   */
   drawGauge: function() {
     var self = this;
 
@@ -96,6 +117,10 @@ arcGauge.prototype = {
       return self;
   },
 
+  /**
+   * Draw the text on the gauge
+   * @return {object} arcGauge
+   */
   drawText: function() {
     var self = this;
 
@@ -112,6 +137,11 @@ arcGauge.prototype = {
       return self;
   },
 
+  /**
+   * Update the gauge with new data
+   * @param {number} value (0 - 1)
+   * @return {object} arcGauge
+   */
   updateGauge: function( data ) {
     var self = this;
 

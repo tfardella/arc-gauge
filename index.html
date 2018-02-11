@@ -8,27 +8,27 @@
         margin: 20px;
       }
 
-      #arc-gauge {
-        width: 300px;
-        height: 300px;
-      }
       .bgContainer {
         background-color: white;
       }
 
-      #arc-gauge .fgArc {
+      .arc-gauge {
+        margin: 30px;
+      }
+
+      .arc-gauge .fgArc {
         fill: rgba( 255, 180, 0, 1 );
         stroke: rgba( 255, 180, 0, 1 );
         stroke-width: 4;
       }
 
-      #arc-gauge .bgArc {
+      .arc-gauge .bgArc {
         fill: rgba( 128, 128, 128, 0.5 );
         stroke: rgba( 128, 128, 128, 0.1 );
         stroke-width: 4;
       }
 
-      #arc-gauge .gaugeText {
+      .arc-gauge .gaugeText {
         width: 100%;
         font-size: 60px;
         text-align: center;
@@ -38,37 +38,96 @@
         stroke-width: 1;
         text-anchor: middle;
       }
+
+      #arc-gauge1 {
+        width: 300px;
+        height: 300px;
+      }      
+
+      #arc-gauge2 {
+        width: 200px;
+        height: 200px;
+      }      
+
+      #arc-gauge2.arc-gauge .gaugeText {
+        font-size: 40px;
+      }
+
+      #arc-gauge2.arc-gauge .fgArc {
+        fill: rgb(55, 55, 116);
+        stroke: rgb(55, 55, 116);
+      }
+
+      #arc-gauge3 {
+        width: 150px;
+        height: 150px;
+      }      
+
+      #arc-gauge3.arc-gauge .gaugeText {
+        font-size: 30px;
+      }
+
+      #arc-gauge3.arc-gauge .fgArc {
+        fill: green;
+        stroke: green;
+      }
+
+
     </style>
   </head>
   <body>
     <div class="page-content">
       <h2>Arc Gauge</h2>
-      <div id="arc-gauge"></div>
+      <div id="arc-gauge1" class="arc-gauge"></div>
+      <div id="arc-gauge2" class="arc-gauge"></div>
+      <div id="arc-gauge3" class="arc-gauge"></div>
     </div>
 
-
-    <script src="node_modules/jquery/dist/jquery.min.js" type="text/javascript" charset="utf-8"></script>
     <script src="node_modules/d3/build/d3.min.js" charset="utf-8"></script>
     <script src="arc-gauge.js"></script>
 
     <script>
-      $( function(){
-        var options = {
+      ( function(){
+        var newGauge = function( data, el, options ) {
+          var gauge = new arcGauge( data, el, options );
+          gauge.initialize().drawGauge().drawText();
+  
+          var callback = function() {
+            var data = ( Math.random()  * 100 ) * 0.01;
+            gauge.updateGauge(data);
+          }
+          setInterval( callback, 1500);
+          return gauge;
+        };
+
+        var options1 = {
           'arcWidth': 40,
           'clockwise': false,
           'startAngle': 240,
           'endAngle': 120
         };
-        
-        var myGauge = new arcGauge( 0.5, '#arc-gauge', options );
-        myGauge.initialize().drawGauge().drawText();
 
-        var callback = function() {
-          var data = ( Math.random()  * 100 ) * 0.01;
-          myGauge.updateGauge(data);
-        }
-        setInterval( callback, 1500);
-      });
+        var options2 = {
+          'arcWidth': 30,
+          'clockwise': true,
+          'startAngle': 90,
+          'endAngle': 270,
+          'textY': '0.6em'
+        };
+
+        var options3 = {
+          'arcWidth': 20,
+          'clockwise': false,
+          'startAngle': 180,
+          'endAngle': 90,
+          'textX': '1.2em',
+          'textY': '1.3em'
+        };
+
+        var gauge1 = newGauge( 0.5, '#arc-gauge1', options1 );
+        var gauge2 = newGauge( 0.25, '#arc-gauge2', options2 );
+        var gauge3 = newGauge( 0, '#arc-gauge3', options3 );
+      })();
     </script>
   </body>
 </html>

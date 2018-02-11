@@ -9,7 +9,6 @@
   "author": "Tony Fardella",
   "license": "ISC",
   "dependencies": {
-    "d3": "^4.2.2",
-    "jquery": "^3.1.0"
+    "d3": "^4.2.2"å
   }
 }
